@@ -1,0 +1,11 @@
+{
+  "name": "socialfilter-root",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.10"
+  }
+}
