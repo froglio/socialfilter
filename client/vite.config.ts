@@ -7,6 +7,7 @@ export default defineConfig({
     proxy: {
       "/generate-filters": "http://localhost:3000",
       "/scrape": "http://localhost:3000",
+      "/download-posts": "http://localhost:3000",
     },
   },
 });

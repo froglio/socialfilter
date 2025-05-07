@@ -5,7 +5,13 @@
     "start": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\""
   },
   "devDependencies": {
+    "@types/archiver": "^6.0.3",
     "concurrently": "^8.2.2",
     "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "archiver": "^7.0.1",
+    "fs": "^0.0.1-security",
+    "puppeteer": "^24.8.1"
   }
 }

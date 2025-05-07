@@ -2,6 +2,9 @@ import express from "express";
 import axios from "axios";
 import dotenv from "dotenv";
 import { spawn } from "child_process";
+import fs from "fs";
+import archiver from "archiver";
+import puppeteer from "puppeteer";
 
 dotenv.config();
 
@@ -106,6 +109,117 @@ app.post("/scrape", async (req, res) => {
   } catch (error) {
     console.error("Erro geral:", error);
     res.status(500).json({ error: "Erro inesperado." });
+  }
+});
+
+// Rota para capturar screenshots e gerar arquivo ZIP
+app.post("/download-posts", async (req, res) => {
+  const { posts } = req.body;
+
+  if (!posts || !Array.isArray(posts)) {
+    return res
+      .status(400)
+      .json({ error: "posts são obrigatórias e devem ser um array." });
+  }
+
+  const screenshotsDir = "./temp_screenshots";
+  const zipPath = "./screenshots.zip";
+
+  try {
+    if (!fs.existsSync(screenshotsDir)) {
+      fs.mkdirSync(screenshotsDir);
+    }
+
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    for (const [index, post] of posts.entries()) {
+      const { content, date } = post;
+      const filePath = `${screenshotsDir}/post_${index + 1}.png`;
+
+      await page.setContent(
+        `
+        <html>
+          <head>
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+              }
+              #card {
+                width: 600px;
+                border: 1px solid #ddd;
+                padding: 10px;
+                margin: 10px;
+              }
+              h3 {
+                font-size: 18px;
+                color: black;
+                margin: 0;
+              }
+              .footer {
+                display: flex;
+                margin-top: 16px;
+              }
+              p {
+                font-size: 18px;
+                color: #555;
+                margin: 0;
+              }
+            </style>
+          </head>
+          <body>
+            <div id="card">
+              <h3>${content}</h3>
+              <div class="footer">
+                <p>${date}</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `,
+        { waitUntil: "load" }
+      );
+
+      // Capturar apenas o tamanho do card
+      const cardElement = await page.$("#card");
+      cardElement && (await cardElement.screenshot({ path: filePath }));
+    }
+
+    await browser.close();
+
+    const output = fs.createWriteStream(zipPath);
+    const archive = archiver("zip", { zlib: { level: 1 } });
+
+    archive.pipe(output);
+
+    archive.directory(screenshotsDir, false);
+
+    await archive.finalize();
+
+    output.on("close", () => {
+      if (!fs.existsSync(zipPath)) {
+        console.error("Arquivo ZIP não encontrado.");
+        return res.status(500).json({ error: "Arquivo ZIP não encontrado." });
+      }
+
+      res.download(zipPath, "screenshots.zip", (err) => {
+        if (err) {
+          console.error("Erro ao enviar o arquivo ZIP:", err);
+          return res
+            .status(500)
+            .json({ error: "Erro ao enviar o arquivo ZIP." });
+        }
+
+        // Remover arquivos temporários após o download
+        fs.rmSync(screenshotsDir, { recursive: true, force: true });
+        fs.unlinkSync(zipPath);
+      });
+    });
+  } catch (error) {
+    console.error("Erro ao capturar screenshots ou gerar ZIP:", error);
+    res
+      .status(500)
+      .json({ error: "Erro ao capturar screenshots ou gerar ZIP." });
   }
 });
 
