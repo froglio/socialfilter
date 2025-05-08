@@ -1,19 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import "./ResultsGrid.css";
-
-interface PostAuthor {
-  name: string;
-  username: string;
-  avatar: string;
-}
-
-interface Post {
-  content: string;
-  url: string;
-  date: string;
-  author: PostAuthor;
-}
+import PostCard, { Post } from "./PostCard";
 
 interface ResultsGridProps {
   results: Post[];
@@ -53,44 +41,55 @@ const downloadScreenshots = async (posts: Post[]) => {
   }
 };
 
-const PostCard: React.FC<{ post: Post }> = ({ post }) => {
-  return (
-    <div
-      className="post-card"
-      onClick={() => window.open(post.url, "_blank")}
-      style={{ cursor: "pointer" }}
-    >
-      <div className="post-card-header">
-        <img
-          src={post.author.avatar}
-          alt={`${post.author.name}'s avatar`}
-          className="post-card-avatar"
-        />
-        <div className="post-card-user-info">
-          <p className="post-card-username">@{post.author.username}</p>
-          <p className="post-card-date">{post.date}</p>
-        </div>
-      </div>
-      <div className="post-card-content">
-        <p>{post.content}</p>
-      </div>
-    </div>
-  );
-};
-
 const ResultsGrid: React.FC<ResultsGridProps> = ({ results }) => {
+  const [selectedPosts, setSelectedPosts] = useState<Post[]>([]);
+
+  const handleSelectPost = (post: Post) => {
+    setSelectedPosts((prevSelected) => {
+      if (prevSelected.includes(post)) {
+        return prevSelected.filter((p) => p !== post);
+      } else {
+        return [...prevSelected, post];
+      }
+    });
+  };
+
+  const handleDownload = () => {
+    const postsToDownload = selectedPosts.length > 0 ? selectedPosts : results;
+    downloadScreenshots(postsToDownload);
+  };
+
+  const handleSelectAll = () => {
+    setSelectedPosts(results);
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedPosts([]);
+  };
+
   return (
     <div className="results-grid">
       <h3>Resultados:</h3>
-      <button
-        className="download-button"
-        onClick={() => downloadScreenshots(results)}
-      >
-        Baixar Screenshots
-      </button>
+      <div className="actions">
+        <button className="select-all-button" onClick={handleSelectAll}>
+          Selecionar Todos
+        </button>
+        <button className="deselect-all-button" onClick={handleDeselectAll}>
+          Deselecionar Todos
+        </button>
+        <button className="download-button" onClick={handleDownload}>
+          Baixar Screenshots{" "}
+          {selectedPosts.length > 0 && `(${selectedPosts.length})`}
+        </button>
+      </div>
       <div className="grid">
         {results.map((result, index) => (
-          <PostCard key={index} post={result} />
+          <PostCard
+            key={index}
+            post={result}
+            isSelected={selectedPosts.includes(result)}
+            onSelect={handleSelectPost}
+          />
         ))}
       </div>
     </div>

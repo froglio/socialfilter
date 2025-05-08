@@ -5,6 +5,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import archiver from "archiver";
 import puppeteer from "puppeteer";
+import { formatDateToBrazilian } from "../../utils/dateUtils.ts";
 
 dotenv.config();
 
@@ -15,7 +16,7 @@ app.use(express.json());
 
 // Rota para geração de filtros avançados
 app.post("/generate-filters", async (req, res) => {
-  const { prompt } = req.body;
+  const { prompt, startDate, endDate } = req.body;
 
   if (!prompt) {
     return res.status(400).json({ error: "Prompt é obrigatório." });
@@ -23,26 +24,24 @@ app.post("/generate-filters", async (req, res) => {
 
   try {
     const context = `
-      Aja como um especialista em Social Listening e monitoramento de redes sociais. Dado um pedido de busca feito por um analista, gere uma lista de palavras-chave e uma ou mais expressões booleanas (filtros) que poderiam ser usadas para encontrar publicações no X (antigo Twitter) relacionadas ao pedido.
-      
-      -> Extraia a entidade de interesse (empresa, marca, produto, pessoa, etc.);
-      -> Identifique o sentimento buscado (elogios, críticas, sugestões, etc.);
-      -> Liste variações de linguagem natural que representam esse sentimento;
-      -> Gere de 3 a 5 filtros avançados com operadores booleanos do X, no formato:
-      (palavra1 OR "frase exata" OR palavra2) AND entidade since:AAAA-MM-DD until:AAAA-MM-DD lang:pt
+      Aja como um especialista em Social Listening e monitoramento de redes sociais. Dado um pedido de busca feito por um analista, gere uma lista de palavras-chave e de 3 a 5 expressões booleanas (filtros) que poderiam ser usadas para encontrar publicações no X (antigo Twitter) relacionadas ao pedido.
+      Siga estas regras:
+        Extraia a entidade de interesse (empresa, marca, produto, pessoa, etc.);
+        Identifique o sentimento buscado (elogios, críticas, sugestões, etc.);
+        Liste variações de linguagem natural que representam esse sentimento;
+        Gere de 3 a 5 filtros booleanos no formato (ou similar a este):
+        (palavra1 OR frase exata OR palavra2) AND entidade since:${startDate} until:${endDate} lang:pt;
 
-      Entrada do usuário: {input_do_usuário}
-
-      Retorne:
-      * Filtros sugeridos
-
-      Nunca inclua explicações ou outras coisas que não sejam exatamente o retorno esperado.
-      Não adicione elementos como *, -, + ou outros caracteres especiais.
-      Não adicione aspas ou parênteses desnecessários.
-      Não adicione quebras de linha ou espaços desnecessários.
-      Não adicione informações adicionais ou contexto.
-      Não adicione informações sobre o que você está fazendo ou como você está fazendo.
+      Instruções de saída:
+        Retorne apenas uma lista de strings completas válida, onde cada string representa um elemento no array e um filtro booleano inteiro, completo, sem fragmentação;
+        Cada filtro deve estar contido inteiramente em uma única string da lista;
+        Não divida os filtros em partes, não quebre linhas e não adicione caracteres extras;
+        Não adicione nenhuma explicação ou comentário;
+        Não adicione elementos como *, -, + ou outros caracteres especiais;
+        A saída deve conter apenas o objeto JSON com os filtros;
     `;
+
+    console.log(startDate, endDate);
 
     const response = await axios.post(
       "https://api.groq.com/openai/v1/chat/completions",
@@ -64,11 +63,9 @@ app.post("/generate-filters", async (req, res) => {
       }
     );
 
-    const rawFilters = response.data.choices[0].message.content;
-    const filters = rawFilters
-      .split("\n")
-      .map((filter) => filter.trim())
-      .filter((filter) => filter);
+    const rawFilters = JSON.parse(response.data.choices[0].message.content);
+    const filters = rawFilters.map((filter) => filter.trim());
+
     res.json({ filters });
   } catch (error) {
     console.error("Erro ao chamar a API do Groq:", error);
@@ -171,7 +168,7 @@ app.post("/download-posts", async (req, res) => {
             <div id="card">
               <h3>${content}</h3>
               <div class="footer">
-                <p>${date}</p>
+                <p>${formatDateToBrazilian(date)}</p>
               </div>
             </div>
           </body>

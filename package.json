@@ -1,6 +1,7 @@
 {
   "name": "socialfilter-root",
   "private": true,
+  "type": "module",
   "scripts": {
     "start": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\""
   },
