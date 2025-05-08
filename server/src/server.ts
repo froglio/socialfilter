@@ -6,6 +6,7 @@ import fs from "fs";
 import archiver from "archiver";
 import puppeteer from "puppeteer";
 import { formatDateToBrazilian } from "../../utils/dateUtils.ts";
+import { decodeHtml } from "../../utils/decodeHtml.ts";
 
 dotenv.config();
 
@@ -152,6 +153,8 @@ app.post("/download-posts", async (req, res) => {
                 font-size: 18px;
                 color: black;
                 margin: 0;
+                text-align: left;
+                white-space: pre-line;
               }
               .footer {
                 display: flex;
@@ -166,7 +169,7 @@ app.post("/download-posts", async (req, res) => {
           </head>
           <body>
             <div id="card">
-              <h3>${content}</h3>
+              <h3>${decodeHtml(content)}</h3>
               <div class="footer">
                 <p>${formatDateToBrazilian(date)}</p>
               </div>

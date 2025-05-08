@@ -1,10 +1,6 @@
-export const decodeHtml = (text: string) => {
-  const textarea = document.createElement("textarea");
-  textarea.innerHTML = text;
-  const decoded = textarea.value.replace(
-    /^(@\w+\s*)+|https?:\/\/\S+|www\.\S+/g,
-    ""
-  );
+import he from "he";
 
-  return decoded;
+export const decodeHtml = (text: string) => {
+  const decoded = he.decode(text);
+  return decoded.replace(/^(@\w+\s*)+|https?:\/\/\S+|www\.\S+/g, "");
 };

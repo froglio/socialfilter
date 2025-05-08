@@ -27,12 +27,8 @@ async def scrape_twitter_posts(query: str, limit: int = 50):
 
   await api.pool.login_all()
 
-  # Realiza a busca com limite definido
   tweets = await gather(api.search(query, limit=limit))
-
-  # Extrai e imprime URLs
   tweet_urls = [tweet.url for tweet in tweets]
-
   tweet_data = [
     {
       "url": tweet.url,
@@ -50,7 +46,6 @@ async def scrape_twitter_posts(query: str, limit: int = 50):
   return tweet_data
 
 if __name__ == "__main__":
-  # Exemplo de uso: python scraper.py "from:Lojas_Renner atendimento lang:pt"
   if len(sys.argv) < 2:
     sys.exit(1)
 
