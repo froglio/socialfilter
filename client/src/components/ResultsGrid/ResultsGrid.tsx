@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import axios from "axios";
 import "./ResultsGrid.css";
-import PostCard, { Post } from "./PostCard";
+import PostCard, { Post } from "../PostCard/PostCard";
+
+import { Loading } from "../Loading/Loading";
 
 interface ResultsGridProps {
   results: Post[];
+  isLoading: boolean;
 }
 
 const downloadScreenshots = async (posts: Post[]) => {
@@ -41,7 +44,7 @@ const downloadScreenshots = async (posts: Post[]) => {
   }
 };
 
-const ResultsGrid: React.FC<ResultsGridProps> = ({ results }) => {
+const ResultsGrid: React.FC<ResultsGridProps> = ({ results, isLoading }) => {
   const [selectedPosts, setSelectedPosts] = useState<Post[]>([]);
 
   const handleSelectPost = (post: Post) => {
@@ -67,16 +70,19 @@ const ResultsGrid: React.FC<ResultsGridProps> = ({ results }) => {
     setSelectedPosts([]);
   };
 
-  return (
+  if (isLoading) return <Loading />;
+
+  return results.length > 0 ? (
     <div className="results-grid">
-      <h3>Resultados:</h3>
       <div className="actions">
-        <button className="select-all-button" onClick={handleSelectAll}>
-          Selecionar Todos
-        </button>
-        <button className="deselect-all-button" onClick={handleDeselectAll}>
-          Deselecionar Todos
-        </button>
+        <div className="actions-selectable">
+          <button className="select-all-button" onClick={handleSelectAll}>
+            Selecionar Todos
+          </button>
+          <button className="deselect-all-button" onClick={handleDeselectAll}>
+            Deselecionar Todos
+          </button>
+        </div>
         <button className="download-button" onClick={handleDownload}>
           Baixar Screenshots{" "}
           {selectedPosts.length > 0 && `(${selectedPosts.length})`}
@@ -93,6 +99,8 @@ const ResultsGrid: React.FC<ResultsGridProps> = ({ results }) => {
         ))}
       </div>
     </div>
+  ) : (
+    <></>
   );
 };
 

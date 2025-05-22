@@ -1,8 +1,8 @@
 import React from "react";
 import "./PostCard.css";
-import { formatDateToBrazilian } from "../../../utils/dateUtils";
-import { decodeHtml } from "../../../utils/decodeHtml";
-import Checkmark from "./Chekmark";
+import { formatDateToBrazilian } from "../../../../utils/dateUtils";
+import { decodeHtml } from "../../../../utils/decodeHtml";
+import Checkmark from "../Checkmark/Chekmark";
 
 export interface PostAuthor {
   name: string;
