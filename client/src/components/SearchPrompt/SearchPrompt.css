@@ -30,7 +30,6 @@
   color: #fff;
   background-color: #007bff;
   display: flex;
-  border: none;
   border-radius: 0 8px 8px 0;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -39,7 +38,10 @@
   justify-content: center;
   align-items: center;
 }
-
+.search-button:focus {
+  outline: 0;
+  border: 0;
+}
 .search-button:hover {
   background-color: #0056b3;
 }

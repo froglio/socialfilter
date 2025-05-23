@@ -4,6 +4,7 @@ import SearchPrompt from "./components/SearchPrompt/SearchPrompt";
 import FilterSuggestions from "./components/FilterSuggestions/FilterSuggestions";
 import ResultsGrid from "./components/ResultsGrid/ResultsGrid";
 import axios from "axios";
+import { toast } from "sonner";
 
 const App: React.FC = () => {
   const [filters, setFilters] = useState<string[]>([]);
@@ -27,9 +28,19 @@ const App: React.FC = () => {
         startDate,
         endDate,
       });
-      setFilters(response.data.filters);
+
       setIsFiltersLoading(false);
+
+      if (response.status !== 200) {
+        toast.error("Erro ao gerar os filtros! Tente novamente");
+        console.error("Erro ao gerar filtros:");
+        return;
+      }
+
+      setFilters(response.data.filters);
     } catch (error) {
+      setIsFiltersLoading(false);
+      toast.error("Erro ao gerar os filtros! Tente novamente");
       console.error("Erro ao gerar filtros:", error);
     }
   };
@@ -38,9 +49,19 @@ const App: React.FC = () => {
     try {
       setIsResultsLoading(true);
       const response = await axios.post("/scrape", { filter });
-      setResults(response.data.posts);
+
       setIsResultsLoading(false);
+
+      if (response.status !== 200) {
+        toast.error("Erro ao buscar resultados! Tente novamente");
+        console.error("Erro ao buscar resultados:");
+        return;
+      }
+
+      setResults(response.data.posts);
     } catch (error) {
+      setIsResultsLoading(false);
+      toast.error("Erro ao buscar resultados! Tente novamente");
       console.error("Erro ao buscar resultados:", error);
     }
   };

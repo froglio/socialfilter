@@ -11,6 +11,10 @@ body {
   box-sizing: border-box;
   max-width: 1270px;
   margin: 0 auto;
+  padding: 2rem 10rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .logo {

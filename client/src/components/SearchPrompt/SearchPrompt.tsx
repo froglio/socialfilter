@@ -38,7 +38,7 @@ const SearchPrompt: React.FC<SearchPromptProps> = ({ onGenerateFilters }) => {
           type="text"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
-          placeholder="Quero 20 feedbacks do atendimento das lojas Renner"
+          placeholder="Quero feedbacks do atendimento das lojas Renner"
           className="search-input"
         />
         <button
