@@ -354,4 +354,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ for the social media monitoring community**
+**Built by Fabricio Roglio de Sousa for the social media monitoring community**
